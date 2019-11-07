@@ -1,13 +1,18 @@
 # README
 
-National trail data from: https://catalog.data.gov/dataset/usgs-national-transportation-dataset-ntd-downloadable-data-collectionde7d2
+    National trail data from: https://catalog.data.gov/dataset/usgs-national-transportation-dataset-ntd-downloadable-data-collectionde7d2
+
+    https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Tran/Shape/
+    https://prd-tnm.s3.amazonaws.com/StagedProducts/Tran/Shape/TRAN_12_Florida_GU_STATEORTERRITORY.zip
+
+    wget -r --no-parent http://prd-tnm.s3.amazonaws.com/StagedProducts/Tran/Shape/
+
+    wget -r --no-parent "http://prd-tnm.s3.amazonaws.com/StagedProducts/Tran/Shape/"
+
+
 
 1. Process trail data in qgis to get split trails and endpoints
 2. Load into Postgres
-3. Load from postgres to neo4j
-
-
-I think the best thing to do right now is get postgres and pgrouting up on a docker container, populate it, and try to get my results that way!
 
 
 # Write possible pg_routing extension to include our trail algorithm
@@ -21,7 +26,7 @@ For david's thing: select multiple start points ( or none) and multiple destinat
 
 # gis_processing
 
-# Write script to download each state from palce if possible
+# Write script to download each state from placeif possible
 
 1. Reproject (to 3857)
 1. Drop Fields
