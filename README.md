@@ -68,3 +68,10 @@ dbms.security.procedures.unrestricted=algo.*,apoc.*
 to
 /etc/neo4j/neo4j.conf
 
+
+# Probably need web server in the middle to serve mapbox tiles:
+Tegola and Martin seem like two good ones:
+https://tegola.io/tutorials/tegola-with-mapbox/
+https://github.com/urbica/martin
+
+Martin seems to be under more active development
