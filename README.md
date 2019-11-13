@@ -1,32 +1,39 @@
 # README
 
-    National trail data from: https://catalog.data.gov/dataset/usgs-national-transportation-dataset-ntd-downloadable-data-collectionde7d2
+## Priorities
 
-    https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Tran/Shape/
-    https://prd-tnm.s3.amazonaws.com/StagedProducts/Tran/Shape/TRAN_12_Florida_GU_STATEORTERRITORY.zip
+1. Get initial map UI up and running
+2. Plot trails from PostGIS on map (need map tile server)
+3. Connect it with python Routing backend
+4. Create sidebar to display routing results
 
-    wget -r --no-parent http://prd-tnm.s3.amazonaws.com/StagedProducts/Tran/Shape/
+If there is time:
 
-    wget -r --no-parent "http://prd-tnm.s3.amazonaws.com/StagedProducts/Tran/Shape/"
+5. Implement Redis as a caching layer for partial paths
+6. Group similar trail routes with similarity score
+7. Implement glacier campsite optimizer...
+
+## Implementaion Notes
+
+We could do front end entirely with html/css/javascript/mapboxgl.
+
+Or we could use a javascript framework like React - more time to learn but might be better experience.
+
+We will need a map tile server such as Martin to serve trails and junctions from postgres.
+
+Seperate server will interface with trail routing backend.
 
 
+# Random Notes:
 
-1. Process trail data in qgis to get split trails and endpoints
-2. Load into Postgres
+National trail data from: https://catalog.data.gov/dataset/usgs-national-transportation-dataset-ntd-downloadable-data-collectionde7d2
 
-
-# Write possible pg_routing extension to include our trail algorithm
-
-Typescript/React wrapper over mapbox map, with left bar for trail possibilities, and a 2-sided slider for selecting length
-
-Do trail to trail or loop mode.
-
-For david's thing: select multiple start points ( or none) and multiple destinations (campsites) and enumerate the possibilities.
-
+https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Tran/Shape/
+https://prd-tnm.s3.amazonaws.com/StagedProducts/Tran/Shape/TRAN_12_Florida_GU_STATEORTERRITORY.zip
 
 # gis_processing
 
-# Write script to download each state from placeif possible
+# GIS Processing Steps
 
 1. Reproject (to 3857)
 1. Drop Fields
@@ -37,36 +44,6 @@ For david's thing: select multiple start points ( or none) and multiple destinat
 4. extract specfic vertices (0, -1)
 5. Calculate length
 
-# Interesting that OnX doesn't merge lines within same reach, making arbitrary points along trail
-
-# First need to join all lines (by endpoints touching)
-Dissolve by Name and trail number
-
-## Split lines at intersections
-Processing toolbox -> QGIS Geoalgorithms -> Vector Overlay tools -> Split lines by lines
-
-{ 'INPUT' : '/home/meow/Classes/Databases/Polyglot/Shape/Trans_TrailSegment.shp', 'LINES' : '/home/meow/Classes/Databases/Polyglot/Shape/Trans_TrailSegment.shp', 'OUTPUT' : 'memory:' }
-
-
-## Generate intersection points and/or endpoints
-processing.runalg('qgis:lineintersections', input_a, input_b, field_a, field_b, output)
-
-Extract Specific Vertices
-0,-1
-
-## Merge those points (probably)
-
-# I need to end up with connected lines between trail junctions and trail ends with points at trail junctions and trail ends. If I can preserve trail name and number, (and maybe even USFS designations), that would be ideal, but I don't need it for this prototype.
-
-
-
-# Neo4j graph algorithms install: had to move jar to /var/lib/neo4j/plugins and add:
-
-```
-dbms.security.procedures.unrestricted=algo.*,apoc.*
-```
-to
-/etc/neo4j/neo4j.conf
 
 
 # Probably need web server in the middle to serve mapbox tiles:
