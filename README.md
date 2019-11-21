@@ -2,6 +2,17 @@
 
 ## Priorities
 
+Dave's Requirements:
+1. Build a user interface
+2. Cache partial paths with redis
+3. Merge trails for entire US
+4. Point-to-point (consider simul BFS)
+5. OPTIONAL: Path similarity (if actually an issue) - ferche distance...
+
+
+---------------------
+
+
 1. Get initial map UI up and running
 2. Plot trails from PostGIS on map (need map tile server)
 3. Connect it with python Routing backend
