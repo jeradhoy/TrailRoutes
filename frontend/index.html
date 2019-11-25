@@ -53,15 +53,23 @@
 
     var hoverPointId = null;
 
+
     map.on('load', function(e) {
+
+        map.addSource("junctions", {
+            type: 'vector',
+            url: 'mapbox://jeradhoy.9hb67zp8',
+        });
+
+        map.addSource("trails", {
+            type: 'vector',
+            url: 'mapbox://jeradhoy.5y8ak888'
+        });
 
         map.addLayer({
             id: "trails-all",
             type: "line",
-            source: {
-              type: 'vector',
-              url: 'mapbox://jeradhoy.5y8ak888'
-            },
+            source: "trails",
             "source-layer": "all_trails-4x30nq",
             layout: {
               "line-join": "round",
@@ -73,49 +81,52 @@
               "line-dasharray": [1, 2]
 
             }
-      });
-      map.addSource("junctions", {
-          type: 'vector',
-          url: 'mapbox://jeradhoy.9hb67zp8',
-      });
+        });
 
-      map.addLayer({
-            id: "junctions-all",
-            type: "circle",
-            source: "junctions",
-            "source-layer": "junctions-6f1q8p",
-            paint: {
-              "circle-radius": 5,
-              "circle-color": "#B42222",
-              "circle-opacity": ["case",
-                  ["boolean", ["feature-state", "hover"], false],
-                  1,
-                  0.5
-              ]
-            }
-      });
 
-      map.on("mousemove", "junctions-all", function(e) {
-        console.log(e.features[0].properties["JUNCT_ID"])
-        map.getCanvas().style.cursor = 'pointer';
-        if (e.features.length > 0) {
-            if (hoverPointId) {
-                map.setFeatureState({source: 'junctions', id: hoverPointId, sourceLayer: "junctions-6f1q8p"}, { hover: false});
-            }
-            hoverPointId = e.features[0].id;
-            map.setFeatureState({source: 'junctions', id: hoverPointId, sourceLayer: "junctions-6f1q8p"}, { hover: true});
-        }
-      });
-
-      map.on("mouseleave", "junctions-all", function() {
-        map.getCanvas().style.cursor = '';
-        if (hoverPointId) {
-          map.setFeatureState({source: 'junctions', id: hoverPointId, sourceLayer: "junctions-6f1q8p"}, { hover: false});
-        }
-        hoveredStateId =  null;
-      });
-
+        map.addLayer({
+              id: "junctions-all",
+              type: "circle",
+              source: "junctions",
+              "source-layer": "junctions-6f1q8p",
+              paint: {
+                "circle-radius": 5,
+                "circle-color": "#B42222",
+                "circle-opacity": ["case",
+                    ["boolean", ["feature-state", "hover"], false],
+                    1,
+                    0.5
+                ]
+              }
+        });
     });
+
+        // Creates hover effect when you mouse over junction
+        map.on("mousemove", "junctions-all", function(e) {
+          //console.log(e.features[0].properties["JUNCT_ID"])
+          map.getCanvas().style.cursor = 'pointer';
+          if (e.features.length > 0) {
+              if (hoverPointId) {
+                  map.setFeatureState({source: 'junctions', id: hoverPointId, sourceLayer: "junctions-6f1q8p"}, { hover: false});
+              }
+              hoverPointId = e.features[0].id;
+              map.setFeatureState({source: 'junctions', id: hoverPointId, sourceLayer: "junctions-6f1q8p"}, { hover: true});
+          }
+        });
+
+        // Removes hover effect when you mouse over junction
+        map.on("mouseleave", "junctions-all", function() {
+          map.getCanvas().style.cursor = '';
+          if (hoverPointId) {
+            map.setFeatureState({source: 'junctions', id: hoverPointId, sourceLayer: "junctions-6f1q8p"}, { hover: false});
+          }
+          hoveredStateId =  null;
+        });
+
+        // Logs the JUNCT_ID of the feature you are mousing over
+        map.on("click", "junctions-all", function(e) {
+          console.log(e.features[0].properties["JUNCT_ID"])
+        });
 
 
 
