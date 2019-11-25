@@ -47,8 +47,10 @@ https://prd-tnm.s3.amazonaws.com/StagedProducts/Tran/Shape/TRAN_12_Florida_GU_ST
 
 # GIS Processing Steps
 
+1. Load them all
+2. Merge vector layers
 1. Reproject (to 3857)
-1. Drop Fields (Everything except NAME, TRAILNUMBE, SOURCE_ORI, SOURCE_D_1)
+1. Drop Fields (Everything except NAME, TRAILNUMBE, SOURCE_ORI, SOURCE_D_1) - Does this get rid of my trail names?
 1. Dissolve
 2. merge lines
 3. split with lines
