@@ -1,87 +1,41 @@
-
-
-
 from typing import *
+import psycopg2
 
-# trail_num, junct1, Node2, dist
+# Change user who can access database
+conn = psycopg2.connect(dbname="trailDb", user="postgres", host="localhost", password="meow")
+cur = conn.cursor()
 
-trail_list = [
-    ["1", "a", "b", 1],
-    ["2", "b", "c", 1.5],
-    ["3", "b", "c", 2],
-    ["4", "c", "d", 2]
-]
+# TODO: WITH thing seems jenky
+stmt = """
+SELECT t.id, t.length_mi, t.junct1, t.junct2
+    FROM junctions as j, trail_junct_rel AS t
+    WHERE j.junct_id = %s AND
+    ST_DWithin(t.geom, j.geom, %s);
+"""
 
-def create_trail_dict(trail_list: List) -> Dict:
-    trail_dict = {}
-    for trail in trail_list:
-        trail_dict[trail[0]] = {"junct1": trail[1], "junct2": trail[2], "dist": trail[3]}
-    return trail_dict
+cur.execute(stmt, (5924, 10000))
+trail_list = cur.fetchall()
+cur.close()
 
+# {trail_id: [(node_1, node_2, dist)]}
 def create_node_dict(trail_list: List) -> Dict:
     node_dict = {}
 
     for trail in trail_list:
-        start_node = trail[1]
-        if start_node not in node_dict:
-            node_dict[start_node] = []
-        node_dict[start_node].append({"trail": trail[0], "end": trail[2], "dist": trail[3]})
-
-    for trail in trail_list:
         start_node = trail[2]
         if start_node not in node_dict:
             node_dict[start_node] = []
-        node_dict[start_node].append({"trail": trail[0], "end": trail[1], "dist": trail[3]})
-    return node_dict
-
-def create_node_dict(trail_list: List) -> Dict:
-    node_dict = {}
+        node_dict[start_node].append((trail[3], trail[0], trail[1]))
 
     for trail in trail_list:
-        start_node = trail[1]
+        start_node = trail[3]
         if start_node not in node_dict:
             node_dict[start_node] = []
-        node_dict[start_node].append((trail[2], trail[0], trail[3]))
-
-    for trail in trail_list:
-        start_node = trail[2]
-        if start_node not in node_dict:
-            node_dict[start_node] = []
-        node_dict[start_node].append((trail[1], trail[0], trail[3]))
+        node_dict[start_node].append((trail[2], trail[0], trail[1]))
 
     return node_dict
 
 
-
-def create_node_dict2(trail_list: List) -> Dict:
-    node_dict = {}
-
-    for trail in trail_list:
-        start_node = trail[1]
-        if start_node not in node_dict:
-            node_dict[start_node] = []
-        node_dict[start_node].append((trail[2], trail[3]))
-
-    for trail in trail_list:
-        start_node = trail[2]
-        if start_node not in node_dict:
-            node_dict[start_node] = []
-        node_dict[start_node].append((trail[1], trail[3]))
-    return node_dict
-
-
-trail_dict = create_trail_dict(trail_list)
-node_dict = create_node_dict(trail_list)
-node_dict2 = create_node_dict2(trail_list)
-
-my_graph = {
-    "a": [("b", "1", 1)],
-    "b": [("c", "2", 1.5), ("c", "3", 2)],
-    "c": [("d", "4", 3)],
-    "d": [("e", "5", 2), ("f", "6", 3)],
-    "f": [("g", "7", 3)]
-
-}
 
 def find_all_paths(graph, current_node, max_dist, target_node=None, trail_to=None, current_dist=0, path=[]):
 
@@ -131,4 +85,6 @@ def find_loops(graph, start_node, min_dist, max_dist):
     butts = find_butted_paths(all_paths, min_dist, max_dist)
     return [([path[1] for path in all_paths[butt[0]] if path[1] is not None] + [path[1] for path in all_paths[butt[1]][::-1] if path[1] is not None], butt[2]) for butt in butts]
 
-find_loops(node_dict, "a", 5, 10)
+if __name__ == "__main__":
+    node_dict = create_node_dict(trail_list)
+    find_loops(node_dict, 5924, 5, 10)
