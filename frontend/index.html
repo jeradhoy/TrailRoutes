@@ -101,32 +101,36 @@
         });
     });
 
-        // Creates hover effect when you mouse over junction
-        map.on("mousemove", "junctions-all", function(e) {
-          //console.log(e.features[0].properties["JUNCT_ID"])
-          map.getCanvas().style.cursor = 'pointer';
-          if (e.features.length > 0) {
-              if (hoverPointId) {
-                  map.setFeatureState({source: 'junctions', id: hoverPointId, sourceLayer: "junctions-6f1q8p"}, { hover: false});
-              }
-              hoverPointId = e.features[0].id;
-              map.setFeatureState({source: 'junctions', id: hoverPointId, sourceLayer: "junctions-6f1q8p"}, { hover: true});
-          }
-        });
-
-        // Removes hover effect when you mouse over junction
-        map.on("mouseleave", "junctions-all", function() {
-          map.getCanvas().style.cursor = '';
+    // Creates hover effect when you mouse over junction
+    map.on("mousemove", "junctions-all", function(e) {
+      //console.log(e.features[0].properties["JUNCT_ID"])
+      map.getCanvas().style.cursor = 'pointer';
+      if (e.features.length > 0) {
           if (hoverPointId) {
-            map.setFeatureState({source: 'junctions', id: hoverPointId, sourceLayer: "junctions-6f1q8p"}, { hover: false});
+              map.setFeatureState({source: 'junctions', id: hoverPointId, sourceLayer: "junctions-6f1q8p"}, { hover: false});
           }
-          hoveredStateId =  null;
-        });
+          hoverPointId = e.features[0].id;
+          map.setFeatureState({source: 'junctions', id: hoverPointId, sourceLayer: "junctions-6f1q8p"}, { hover: true});
+      }
+    });
 
-        // Logs the JUNCT_ID of the feature you are mousing over
-        map.on("click", "junctions-all", function(e) {
-          console.log(e.features[0].properties["JUNCT_ID"])
-        });
+    // Removes hover effect when you mouse over junction
+    map.on("mouseleave", "junctions-all", function() {
+      map.getCanvas().style.cursor = '';
+      if (hoverPointId) {
+        map.setFeatureState({source: 'junctions', id: hoverPointId, sourceLayer: "junctions-6f1q8p"}, { hover: false});
+      }
+      hoveredStateId =  null;
+    });
+
+    // Logs the JUNCT_ID of the feature you are mousing over
+    map.on("click", "junctions-all", function(e) {
+      console.log(e.features[0].properties["JUNCT_ID"])
+    });
+
+    map.on("click", "trails-all", function(e) {
+      console.log(e.features[0].properties["ID"])
+    });
 
 
 
