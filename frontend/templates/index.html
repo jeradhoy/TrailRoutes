@@ -135,5 +135,22 @@
 
 
 </script>
+<script>
+  console.log("meow")
+
+  var request = new XMLHttpRequest()
+
+  // Open a new connection, using the GET request on the URL endpoint
+  request.open('GET', 'http://localhost:5000/routes/1', true)
+
+  request.onload = function() {
+    // Begin accessing JSON data here
+    console.log(JSON.parse(this.response))
+  }
+
+  // Send request
+  request.send()
+
+</script>
 </body>
 </html>
