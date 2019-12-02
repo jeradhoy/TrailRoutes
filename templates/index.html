@@ -17,7 +17,7 @@
       -webkit-font-smoothing:antialiased;
       }
     .sidebar {
-      width:33.3333%;
+      width:15%;
       }
     .pad2 {
       padding:0px;
@@ -28,8 +28,8 @@
     .map {
       border-left:1px solid #fff;
       position:absolute;
-      left:33.3333%;
-      width:66.6666%;
+      left:15%;
+      width:85%;
       top:0;bottom:0;
       }
 
@@ -104,7 +104,7 @@
     <h1>Trail Routes</h1>
   </div>
   <div class='mileInput'>
-    <input type="number" name="maxMiles">
+    <input id="maxMileInput" type="number" name="maxMiles" value=10>
   </div>
   <div id='listings', class='listings'></div>
 </div>
@@ -159,8 +159,9 @@
       }
 
       let listings = document.getElementById('listings');
-      listings.innerHTML = ""
+      highlight_trails([""])
 
+      listings.innerHTML = ""
       // Iterate through the list of stores
       for (let i = 0; i < data.length; i++) {
 
@@ -178,15 +179,20 @@
         link.href = '#';
         link.className = 'title';
         link.dataPosition = i;
-        link.innerHTML = currentPath["trails"].join();
+        link.innerHTML = Math.round(currentPath["dist"] * 100)/100 + " miles";
         link.addEventListener('click', linkEventListener)
+
+        if(i == 0){
+          link.click()
+        }
 
         // Create a new div with the class 'details' for each store
         // and fill it with the city and phone number
-        let details = listing.appendChild(document.createElement('div'));
-        details.innerHTML = currentPath["dist"].toString();
-        details.innerHTML += " miles"
+        //let details = listing.appendChild(document.createElement('div'));
+        //details.innerHTML = currentPath["dist"];
+        //details.innerHTML += " miles"
       }
+
 
 
     }
@@ -244,6 +250,7 @@
               id: "junctions-all",
               type: "circle",
               source: "junctions",
+              minzoom: 9,
               "source-layer": "junctions-6f1q8p",
               paint: {
                 "circle-radius": 5,
@@ -283,26 +290,51 @@
       console.log(e.features[0].properties)
     });
 
+    let junct_selected = null
+
     // Logs the JUNCT_ID of the feature you are mousing over
     map.on("click", "junctions-all", function(e) {
-      console.log(e.features[0].properties)
 
-      var request = new XMLHttpRequest()
+      let maxMiles = document.getElementById("maxMileInput").value;
+      junct_selected = e.features[0].properties["JUNCT_ID"];
+
+      get_paths_and_build(maxMiles, junct_selected);
+
+    });
+
+    function get_paths_and_build(maxMiles, junct_id){
+
+      document.getElementById('listings').innerHTML = "Loading..."
+
+      var request = new XMLHttpRequest();
+
+      let requestString = 'http://trails.jerad.co/routes/' + junct_id + "&" + maxMiles
 
       // Open a new connection, using the GET request on the URL endpoint
-      request.open('GET', 'http://167.172.212.129/routes/1', true)
+      request.open('GET', requestString, true)
 
       request.onload = function() {
         // Begin accessing JSON data here
-        var data = JSON.parse(this.response)
-        console.log(data)
+        let data = JSON.parse(this.response)
         buildPathList(data)
       }
 
       // Send request
       request.send()
-    });
 
+    }
+
+    document.getElementById("maxMileInput").addEventListener('input', inputChangeTrigger)
+
+    function inputChangeTrigger(e){
+      console.log("input changed!")
+      console.log(junct_selected)
+      let maxMiles = document.getElementById("maxMileInput").value;
+      if(junct_selected !== null){
+        console.log("building!")
+        get_paths_and_build(maxMiles, junct_selected);
+      }
+    }
 
 
 

@@ -1,31 +1,29 @@
 from typing import *
 import psycopg2
-import database
+#import database
 
-# Change user who can access database
-conn = psycopg2.connect(dbname="trailDb", user="postgres", host="localhost", password="meow")
-cur = conn.cursor()
+def get_trails(conn, junct_id, max_dist):
 
-stmt = """
-SELECT t.id, t.length_mi, t.junct1, t.junct2
-    FROM junctions as j, trail_junct_rel AS t
-    WHERE j.junct_id = %s AND
-    ST_DWithin(t.geom, j.geom, %s);
-"""
+    stmt = """
+    SELECT t.id, t.length_mi, t.junct1, t.junct2
+        FROM junctions as j, trail_junct_rel AS t
+        WHERE j.junct_id = %s AND
+        ST_DWithin(t.geom, j.geom, %s);
+    """
+    cur = conn.cursor()
+    cur.execute(stmt, (junct_id, max_dist*1609.34))
+    data = cur.fetchall()
+    cur.close()
+    return data
 
-cur.execute(stmt, (5924, 10000))
-trail_list = cur.fetchall()
-cur.close()
 
-def get_all_loops(conn,junct_id,distance):
-    conn = psycopg2.connect(dbname="trailDb", user="postgres", host="localhost", password="meow")
+def get_all_loops(conn, junct_id, max_dist):
     
-    trail_list = get_trails(conn,junct_id,distance)
+    trail_list = get_trails(conn, junct_id, max_dist)
 
     node_dict = create_node_dict(trail_list)
-    loops = find_loops(node_dict, 5924, 5, 10)
 
-    conn.close()
+    loops = find_loops(node_dict, junct_id, 0, max_dist)
 
     return(loops)
 
@@ -96,7 +94,8 @@ def find_loops(graph, start_node, min_dist, max_dist):
 
     all_paths = find_all_paths(graph, start_node, max_dist/2)
     butts = find_butted_paths(all_paths, min_dist, max_dist)
-    return [([path[1] for path in all_paths[butt[0]] if path[1] is not None] + [path[1] for path in all_paths[butt[1]][::-1] if path[1] is not None], butt[2]) for butt in butts]
+    path_list_dict = [{"trails": [path[1] for path in all_paths[butt[0]] if path[1] is not None] + [path[1] for path in all_paths[butt[1]][::-1] if path[1] is not None], "dist": butt[2]} for butt in butts]
+    return sorted(path_list_dict, key = lambda entry: entry["dist"], reverse=True)
 
 
 if __name__ == "__main__":
