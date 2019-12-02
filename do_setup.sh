@@ -13,3 +13,5 @@ pip3 install flask_restful
 
 sudo apt install libpq-dev
 pip3 install psycopg2
+
+sudo ufw allow 80

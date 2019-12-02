@@ -32,15 +32,105 @@
       width:66.6666%;
       top:0;bottom:0;
       }
+
+      .listings {
+        height: 100%;
+        overflow: auto;
+        padding-bottom: 60px;
+      }
+
+      .listings .item {
+        display: block;
+        border-bottom: 1px solid #eee;
+        padding: 10px;
+        text-decoration: none;
+      }
+
+      .listings .item:last-child { border-bottom: none; }
+
+      .listings .item .title {
+        display: block;
+        color: #00853e;
+        font-weight: 700;
+      }
+
+      .listings .item .title small { font-weight: 400; }
+
+      .listings .item.active .title,
+      .listings .item .title:hover { color: #8cc63f; }
+
+      .listings .item.active {
+        background-color: #f8f8f8;
+      }
+
+      ::-webkit-scrollbar {
+        width: 3px;
+        height: 3px;
+        border-left: 0;
+        background: rgba(0, 0, 0, 0.1);
+      }
+
+      ::-webkit-scrollbar-track {
+        background: none;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #00853e;
+        border-radius: 0;
+      }
+
+      .clearfix { display: block; }
+
+      .clearfix::after {
+        content: '.';
+        display: block;
+        height: 0;
+        clear: both;
+        visibility: hidden;
+      }
   </style>
 </head>
+
+
+
+
+
+
+
+
 <body>
 <div class='sidebar pad2'>
-  Max Miles: 
-  <input type="number" name="maxMiles">
+  <div class='heading'>
+    <h1>Trail Routes</h1>
+  </div>
+  <div class='mileInput'>
+    <input type="number" name="maxMiles">
+  </div>
+  <div id='listings', class='listings'></div>
 </div>
+
 <div id='map' class='map pad2'></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <script>
+
     mapboxgl.accessToken = 'pk.eyJ1IjoiamVyYWRob3kiLCJhIjoiY2szZXd5dnBuMDA0NzNobnRhNDBvMjJpNSJ9.QxDHGJ-5MQD--0c7XpVOVA';//'pk.eyJ1IjoiamVyYWRob3kiLCJhIjoib1A4Y3RFayJ9.ve4v3jODJ71s2Bra6Q_xHw';
     var map = new mapboxgl.Map({
         container: 'map',
@@ -50,8 +140,57 @@
         center: [-111.0429, 45.6770],
         zoom: 10
     });
-
     var hoverPointId = null;
+
+    
+    function buildPathList(data) {
+
+      function linkEventListener(e){
+
+        let clickedTrail = data[this.dataPosition]
+        let activeItem = document.getElementsByClassName('active');
+
+        highlight_trails(clickedTrail["trails"])
+
+        if (activeItem[0]) {
+          activeItem[0].classList.remove('active');
+        }
+        this.parentNode.classList.add('active');
+      }
+
+      let listings = document.getElementById('listings');
+      listings.innerHTML = ""
+
+      // Iterate through the list of stores
+      for (let i = 0; i < data.length; i++) {
+
+        let currentPath = data[i];
+
+        // Select the listing container in the HTML and append a div
+        // with the class 'item' for each store
+        let listing = listings.appendChild(document.createElement('div'));
+        listing.className = 'item';
+        listing.id = 'listing-' + i;
+
+        // Create a new link with the class 'title' for each store
+        // and fill it with the store address
+        let link = listing.appendChild(document.createElement('a'));
+        link.href = '#';
+        link.className = 'title';
+        link.dataPosition = i;
+        link.innerHTML = currentPath["trails"].join();
+        link.addEventListener('click', linkEventListener)
+
+        // Create a new div with the class 'details' for each store
+        // and fill it with the city and phone number
+        let details = listing.appendChild(document.createElement('div'));
+        details.innerHTML = currentPath["dist"].toString();
+        details.innerHTML += " miles"
+      }
+
+
+    }
+
 
 
     map.on('load', function(e) {
@@ -140,29 +279,36 @@
       hoveredStateId =  null;
     });
 
+    map.on("click", "trails-all", function(e) {
+      console.log(e.features[0].properties)
+    });
+
     // Logs the JUNCT_ID of the feature you are mousing over
     map.on("click", "junctions-all", function(e) {
-      console.log(e.features[0].properties["JUNCT_ID"])
+      console.log(e.features[0].properties)
+
       var request = new XMLHttpRequest()
 
       // Open a new connection, using the GET request on the URL endpoint
-      request.open('GET', 'http://167.172.212.129:5000/routes/1', true)
+      request.open('GET', 'http://167.172.212.129/routes/1', true)
 
       request.onload = function() {
         // Begin accessing JSON data here
         var data = JSON.parse(this.response)
-        map.setFilter("trails-highlighted", ['in', "ID", ...data[0]["trails"] ])
-        
-
+        console.log(data)
+        buildPathList(data)
       }
 
       // Send request
       request.send()
     });
 
-    map.on("click", "trails-all", function(e) {
-      console.log(e.features[0].properties)
-    });
+
+
+
+    function highlight_trails(trail_id_array){
+      map.setFilter("trails-highlighted", ['in', "ID", ...trail_id_array ])
+    }
 
 
 
