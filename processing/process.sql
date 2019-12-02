@@ -21,8 +21,8 @@ WITH junct_trail AS (
     SELECT id as trail_id, junct_id FROM endpoints
     LEFT JOIN junctions
     ON ST_X(endpoints.geom) = ST_X(junctions.geom) and ST_Y(endpoints.geom) = ST_Y(junctions.geom)
-)
-WITH junct_split as (
+),
+junct_split as (
     SELECT trail_id,
     min(junct_id) AS junct1,
     max(junct_id) AS junct2
@@ -33,8 +33,8 @@ SELECT name, trailnumbe, id::INTEGER, length_mi, junct1, junct2, geom FROM trail
 LEFT JOIN junct_split ON junct_split.trail_id = trails.id;
 
 
-DROP TABLE endpoints
-DROP TABLE trails
+DROP TABLE endpoints;
+DROP TABLE trails;
 
 -- Only relevant tables are 'trail_junct_rel' and 'junctions'
 
