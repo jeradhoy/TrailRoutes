@@ -18,7 +18,10 @@ def hello():
 
 class Routes(Resource):
     def get(self, junct_id):
-        return {"path": [1, 2, 3, 4], "dist": 2.4}
+        return [
+                {"trails": [5303, 5305, 5323], "dist": 5.5},
+                {"trails": [5303, 5287, 5288], "dist": 4.9},
+               ]
 
 api.add_resource(Routes, '/routes/<junct_id>')
 

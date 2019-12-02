@@ -1,22 +1,3 @@
-from typing import *
-import psycopg2
-import database
-
-# Change user who can access database
-conn = psycopg2.connect(dbname="trailDb", user="postgres", host="localhost", password="meow")
-cur = conn.cursor()
-
-stmt = """
-SELECT t.id, t.length_mi, t.junct1, t.junct2
-    FROM junctions as j, trail_junct_rel AS t
-    WHERE j.junct_id = %s AND
-    ST_DWithin(t.geom, j.geom, %s);
-"""
-
-cur.execute(stmt, (5924, 10000))
-trail_list = cur.fetchall()
-cur.close()
-
 def get_all_loops(conn,junct_id,distance):
     conn = psycopg2.connect(dbname="trailDb", user="postgres", host="localhost", password="meow")
     
@@ -31,7 +12,7 @@ def get_all_loops(conn,junct_id,distance):
 
 
 # {trail_id: [(node_1, node_2, dist)]}
-def create_node_dict(trail_list: List) -> Dict:
+def create_node_dict(trail_list):
     node_dict = {}
 
     for trail in trail_list:
@@ -99,6 +80,54 @@ def find_loops(graph, start_node, min_dist, max_dist):
     return [([path[1] for path in all_paths[butt[0]] if path[1] is not None] + [path[1] for path in all_paths[butt[1]][::-1] if path[1] is not None], butt[2]) for butt in butts]
 
 
+# {trail_id: [(node_1, node_2, dist)]}
+# graph = {node_id,[(node_id,pathlabel,dist)]}
+def find_point_to_point(graph,start_point,end_point,max_paths):
+    # TODO Max distance might be a good implementation idea to stop bfs from going out too far.
+    # We can stop find the max bfs by looking at the distance between the start and end point.
+    
+    # Idea: Create a new path and path id for each neighbor. Make sure to prune and delete old paths.
+    # Store a list of path ids with each vertex. 
+    # Will need a seperate visited list for each path.
+    paths={}
+
+    node_queue = []
+    node_queue.append(start_point)
+
+    path_ids = {}
+    visited={}
+    for node_id in graph:
+        path_ids[node_id]=[]
+        visited[node_id]=False
+    visited[start_point]=True
+    path_ids[start_point].append(0)
+    paths[0]=[start_point]
+
+    while node_queue:
+        
+        current_node=node_queue.pop(0)
+        print(current_node)
+
+        for neighbor in graph[current_node]: 
+            neighbor = neighbor[0]
+            # TODO update distance here.
+            if visited[neighbor] == False: 
+                node_queue.append(neighbor) 
+                visited[neighbor] = True
+
+        
+
+
+
 if __name__ == "__main__":
-    node_dict = create_node_dict(trail_list)
-    print(find_loops(node_dict, 5924, 5, 10))
+    sample_graph = [("a",1, 1,3),
+                    ("b",1, 1,2),
+                    ("c",1, 3,4),
+                    ("d",1, 2,5),
+                    ("e",1, 2,4),
+                    ("f",1, 4,6),
+                    ("g",1, 5,6),
+                    ("h",1, 7,8)]
+    node_dict = create_node_dict(sample_graph)
+    find_loops(node_dict, 1, 0, 4)
+    find_point_to_point(node_dict,1,6,7)

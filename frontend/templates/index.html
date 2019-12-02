@@ -83,6 +83,23 @@
             }
         });
 
+        map.addLayer({
+            id: "trails-highlighted",
+            type: "line",
+            source: "trails",
+            "source-layer": "all_trails-4x30nq",
+            layout: {
+              "line-join": "round",
+              "line-cap": "round"
+            },
+            paint: {
+              "line-color": "#ffff00",
+              "line-width": 2
+              //"line-offset": 2
+            },
+            filter: ["in", "ID", ""]
+        });
+
 
         map.addLayer({
               id: "junctions-all",
@@ -126,30 +143,28 @@
     // Logs the JUNCT_ID of the feature you are mousing over
     map.on("click", "junctions-all", function(e) {
       console.log(e.features[0].properties["JUNCT_ID"])
+      var request = new XMLHttpRequest()
+
+      // Open a new connection, using the GET request on the URL endpoint
+      request.open('GET', 'http://167.172.212.129:5000/routes/1', true)
+
+      request.onload = function() {
+        // Begin accessing JSON data here
+        var data = JSON.parse(this.response)
+        map.setFilter("trails-highlighted", ['in', "ID", ...data[0]["trails"] ])
+        
+
+      }
+
+      // Send request
+      request.send()
     });
 
     map.on("click", "trails-all", function(e) {
-      console.log(e.features[0].properties["ID"])
+      console.log(e.features[0].properties)
     });
 
 
-
-</script>
-<script>
-  console.log("meow")
-
-  var request = new XMLHttpRequest()
-
-  // Open a new connection, using the GET request on the URL endpoint
-  request.open('GET', 'http://localhost:5000/routes/1', true)
-
-  request.onload = function() {
-    // Begin accessing JSON data here
-    console.log(JSON.parse(this.response))
-  }
-
-  // Send request
-  request.send()
 
 </script>
 </body>
