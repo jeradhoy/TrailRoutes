@@ -88,6 +88,10 @@
         clear: both;
         visibility: hidden;
       }
+      .distInput {
+        width: 80px;
+        left: 5;
+      }
   </style>
 </head>
 
@@ -103,8 +107,8 @@
   <div class='heading'>
     <h1>Trail Routes</h1>
   </div>
-  <div class='mileInput'>
-    <input id="maxMileInput" type="number" name="maxMiles" value=10>
+  <div style="text-align:center">
+    <input id="maxMileInput" type="number" name="maxMiles" value=10 class="distInput">
   </div>
   <div id='listings', class='listings'></div>
 </div>
@@ -203,19 +207,19 @@
 
         map.addSource("junctions", {
             type: 'vector',
-            url: 'mapbox://jeradhoy.9hb67zp8',
+            url: 'mapbox://jeradhoy.bo7xlhfs',
         });
 
         map.addSource("trails", {
             type: 'vector',
-            url: 'mapbox://jeradhoy.5y8ak888'
+            url: 'mapbox://jeradhoy.8nvbs1fn'
         });
 
         map.addLayer({
             id: "trails-all",
             type: "line",
             source: "trails",
-            "source-layer": "all_trails-4x30nq",
+            "source-layer": "trail_rel_split5-7gfg4m",
             layout: {
               "line-join": "round",
               "line-cap": "round"
@@ -232,7 +236,7 @@
             id: "trails-highlighted",
             type: "line",
             source: "trails",
-            "source-layer": "all_trails-4x30nq",
+            "source-layer": "trail_rel_split5-7gfg4m",
             layout: {
               "line-join": "round",
               "line-cap": "round"
@@ -242,7 +246,7 @@
               "line-width": 2
               //"line-offset": 2
             },
-            filter: ["in", "ID", ""]
+            filter: ["in", "id", ""]
         });
 
 
@@ -251,14 +255,14 @@
               type: "circle",
               source: "junctions",
               minzoom: 9,
-              "source-layer": "junctions-6f1q8p",
+              "source-layer": "juncts_split5-03ug6s",
               paint: {
                 "circle-radius": 5,
                 "circle-color": "#B42222",
                 "circle-opacity": ["case",
                     ["boolean", ["feature-state", "hover"], false],
                     1,
-                    0.5
+                    0.1
                 ]
               }
         });
@@ -266,14 +270,14 @@
 
     // Creates hover effect when you mouse over junction
     map.on("mousemove", "junctions-all", function(e) {
-      //console.log(e.features[0].properties["JUNCT_ID"])
+      //console.log(e.features[0].properties["junct_id"])
       map.getCanvas().style.cursor = 'pointer';
       if (e.features.length > 0) {
           if (hoverPointId) {
-              map.setFeatureState({source: 'junctions', id: hoverPointId, sourceLayer: "junctions-6f1q8p"}, { hover: false});
+              map.setFeatureState({source: 'junctions', id: hoverPointId, sourceLayer: "juncts_split5-03ug6s"}, { hover: false});
           }
           hoverPointId = e.features[0].id;
-          map.setFeatureState({source: 'junctions', id: hoverPointId, sourceLayer: "junctions-6f1q8p"}, { hover: true});
+          map.setFeatureState({source: 'junctions', id: hoverPointId, sourceLayer: "juncts_split5-03ug6s"}, { hover: true});
       }
     });
 
@@ -281,7 +285,7 @@
     map.on("mouseleave", "junctions-all", function() {
       map.getCanvas().style.cursor = '';
       if (hoverPointId) {
-        map.setFeatureState({source: 'junctions', id: hoverPointId, sourceLayer: "junctions-6f1q8p"}, { hover: false});
+        map.setFeatureState({source: 'junctions', id: hoverPointId, sourceLayer: "juncts_split5-03ug6s"}, { hover: false});
       }
       hoveredStateId =  null;
     });
@@ -292,11 +296,11 @@
 
     let junct_selected = null
 
-    // Logs the JUNCT_ID of the feature you are mousing over
+    // Logs the junct_id of the feature you are mousing over
     map.on("click", "junctions-all", function(e) {
 
       let maxMiles = document.getElementById("maxMileInput").value;
-      junct_selected = e.features[0].properties["JUNCT_ID"];
+      junct_selected = e.features[0].properties["junct_id"];
 
       get_paths_and_build(maxMiles, junct_selected);
 
@@ -339,7 +343,7 @@
 
 
     function highlight_trails(trail_id_array){
-      map.setFilter("trails-highlighted", ['in', "ID", ...trail_id_array ])
+      map.setFilter("trails-highlighted", ['in', "id", ...trail_id_array ])
     }
 
 

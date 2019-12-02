@@ -94,7 +94,11 @@ def find_loops(graph, start_node, min_dist, max_dist):
 
     all_paths = find_all_paths(graph, start_node, max_dist/2)
     butts = find_butted_paths(all_paths, min_dist, max_dist)
-    path_list_dict = [{"trails": [path[1] for path in all_paths[butt[0]] if path[1] is not None] + [path[1] for path in all_paths[butt[1]][::-1] if path[1] is not None], "dist": butt[2]} for butt in butts]
+    path_list_tuple = [(tuple([path[1] for path in all_paths[butt[0]] if path[1] is not None] + [path[1] for path in all_paths[butt[1]][::-1] if path[1] is not None]), butt[2]) for butt in butts]
+    # Thought I might be fixing a unique issue here, but idk if i did
+    path_list_unique = list(set(path_list_tuple))
+    path_list_dict = [{"trails": path[0] , "dist": path[1]} for path in path_list_unique]
+    #path_list_dict = [{"trails": [path[1] for path in all_paths[butt[0]] if path[1] is not None] + [path[1] for path in all_paths[butt[1]][::-1] if path[1] is not None], "dist": butt[2]} for butt in butts]
     return sorted(path_list_dict, key = lambda entry: entry["dist"], reverse=True)
 
 
