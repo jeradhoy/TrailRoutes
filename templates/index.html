@@ -17,8 +17,13 @@
       -webkit-font-smoothing:antialiased;
       }
     .sidebar {
+      position:absolute;
       width:15%;
-      }
+      height:100%;
+      top:0;left:0;
+      overflow:hidden;
+      border-right:1px solid rgba(0,0,0,0.25);
+    }
     .pad2 {
       padding:0px;
       -webkit-box-sizing:border-box;
@@ -35,7 +40,7 @@
 
       .listings {
         height: 100%;
-        overflow: auto;
+        overflow-y: auto;
         padding-bottom: 60px;
       }
 
@@ -92,6 +97,25 @@
         width: 80px;
         left: 5;
       }
+
+      .slidecontainer {
+        width: 100%; /* Width of the outside container */
+        text-align:center;
+      }
+
+      /* Mouse-over effects */
+      .slider:hover {
+        opacity: 1; /* Fully shown on mouse-over */
+      }
+
+      /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+      .slider::-webkit-slider-thumb {
+        cursor: pointer; /* Cursor on hover */
+      }
+
+      .slider::-moz-range-thumb {
+        cursor: pointer; /* Cursor on hover */
+      }
   </style>
 </head>
 
@@ -103,17 +127,24 @@
 
 
 <body>
-<div class='sidebar pad2'>
-  <div class='heading'>
-    <h1>Trail Routes</h1>
-  </div>
-  <div style="text-align:center">
+  <div class='sidebar pad2'>
+    <div class='heading'>
+      <h1>Trail Routes</h1>
+    </div>
+    <!--
+    <div style="text-align:center">
     <input id="maxMileInput" type="number" name="maxMiles" value=10 class="distInput">
+    </div>
+    -->
+    <div class="slidecontainer">
+      <em>Input Max Mileage:</em>
+      <input type="range" min="1" max="100" value="26" class="slider" id="distSlider" name="miles">
+      <label id="sliderLabel" for="miles"></label>
+    </div>
+    <div id='listings', class='listings'></div>
   </div>
-  <div id='listings', class='listings'></div>
-</div>
 
-<div id='map' class='map pad2'></div>
+  <div id='map' class='map pad2'></div>
 
 
 
@@ -184,10 +215,11 @@
         link.className = 'title';
         link.dataPosition = i;
         link.innerHTML = Math.round(currentPath["dist"] * 100)/100 + " miles";
-        link.addEventListener('click', linkEventListener)
+        link.addEventListener('mouseover', linkEventListener)
 
         if(i == 0){
-          link.click()
+          const mouseoverEvent = new Event('mouseover');
+          link.dispatchEvent(mouseoverEvent);
         }
 
         // Create a new div with the class 'details' for each store
@@ -243,7 +275,7 @@
             },
             paint: {
               "line-color": "#ffff00",
-              "line-width": 2
+              "line-width": 3
               //"line-offset": 2
             },
             filter: ["in", "id", ""]
@@ -257,15 +289,18 @@
               minzoom: 9,
               "source-layer": "juncts_split5-03ug6s",
               paint: {
-                "circle-radius": 5,
+                "circle-radius": 10,
                 "circle-color": "#B42222",
                 "circle-opacity": ["case",
                     ["boolean", ["feature-state", "hover"], false],
                     1,
-                    0.1
+                    0
                 ]
               }
         });
+      let maxMiles = document.getElementById("distSlider").value
+      document.getElementById("sliderLabel").innerHTML = maxMiles + " miles"
+      document.getElementById("listings").innerHTML = "Select starting point!"
     });
 
     // Creates hover effect when you mouse over junction
@@ -277,6 +312,7 @@
               map.setFeatureState({source: 'junctions', id: hoverPointId, sourceLayer: "juncts_split5-03ug6s"}, { hover: false});
           }
           hoverPointId = e.features[0].id;
+          console.log(hoverPointId)
           map.setFeatureState({source: 'junctions', id: hoverPointId, sourceLayer: "juncts_split5-03ug6s"}, { hover: true});
       }
     });
@@ -299,7 +335,8 @@
     // Logs the junct_id of the feature you are mousing over
     map.on("click", "junctions-all", function(e) {
 
-      let maxMiles = document.getElementById("maxMileInput").value;
+      //let maxMiles = document.getElementById("maxMileInput").value;
+      let maxMiles = document.getElementById("distSlider").value
       junct_selected = e.features[0].properties["junct_id"];
 
       get_paths_and_build(maxMiles, junct_selected);
@@ -328,17 +365,32 @@
 
     }
 
-    document.getElementById("maxMileInput").addEventListener('input', inputChangeTrigger)
+    //document.getElementById("maxMileInput").addEventListener('input', inputChangeTrigger)
 
-    function inputChangeTrigger(e){
-      console.log("input changed!")
-      console.log(junct_selected)
-      let maxMiles = document.getElementById("maxMileInput").value;
+    document.getElementById("distSlider").addEventListener('change', sliderTrigger)
+
+    function sliderTrigger(e){
+
+      console.log("Slider changed to " + document.getElementById("distSlider").value)
+      let maxMiles = document.getElementById("distSlider").value
+      document.getElementById("sliderLabel").innerHTML = maxMiles + " miles"
+
       if(junct_selected !== null){
         console.log("building!")
         get_paths_and_build(maxMiles, junct_selected);
       }
+
     }
+
+    // function inputChangeTrigger(e){
+    //   console.log("input changed!")
+    //   console.log(junct_selected)
+    //   let maxMiles = document.getElementById("maxMileInput").value;
+    //   if(junct_selected !== null){
+    //     console.log("building!")
+    //     get_paths_and_build(maxMiles, junct_selected);
+    //   }
+    // }
 
 
 
