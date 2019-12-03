@@ -15,3 +15,5 @@ sudo apt install libpq-dev
 pip3 install psycopg2
 
 sudo ufw allow 80
+
+npm install mapbox-gl-controls
