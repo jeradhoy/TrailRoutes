@@ -233,16 +233,20 @@ function get_paths_and_build(maxMiles, junct_id) {
 
 //document.getElementById("maxMileInput").addEventListener('input', inputChangeTrigger)
 
-document.getElementById("distSlider").addEventListener('change', sliderTrigger)
+document.getElementById("distSlider").addEventListener('change', sliderSetTrigger)
 
-function sliderTrigger(e) {
+document.getElementById("distSlider").addEventListener('input', sliderSlideTrigger)
 
-    console.log("Slider changed to " + document.getElementById("distSlider").value)
+function sliderSlideTrigger(e) {
     let maxMiles = document.getElementById("distSlider").value
     document.getElementById("sliderLabel").innerHTML = maxMiles + " miles"
+}
+
+function sliderSetTrigger(e) {
+
+    let maxMiles = document.getElementById("distSlider").value;
 
     if (junct_selected !== null) {
-        console.log("building!")
         get_paths_and_build(maxMiles, junct_selected);
     }
 
