@@ -3,7 +3,7 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiamVyYWRob3kiLCJhIjoiY2szZXd5dnBuMDA0NzNobnRhN
 var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/outdoors-v10',
-    //style: 'mapbox://styles/mapbox/satellite-streets-v10',
+    // style: 'mapbox://styles/mapbox/satellite-streets-v10',
 
     center: [-111.0429, 45.6770],
     zoom: 10
@@ -19,7 +19,7 @@ var map = new mapboxgl.Map({
 
 
 document.getElementById("sliderLabel").innerHTML = document.getElementById("distSlider").value + " miles"
-document.getElementById("listings").innerHTML = "Select starting point!"
+document.getElementById("listings").innerHTML = "<b>Begin by selecting a starting point on any trail!</b>"
 
 var hoverPointId = null;
 
@@ -237,6 +237,19 @@ document.getElementById("distSlider").addEventListener('change', sliderSetTrigge
 
 document.getElementById("distSlider").addEventListener('input', sliderSlideTrigger)
 
+document.getElementById("routeType").addEventListener('click', routeTypeTrigger)
+
+function routeTypeTrigger(e) {
+    let routeTypeValue = document.getElementById("routeType").value
+    console.log(routeTypeValue)
+    if (routeTypeValue == "pointToPoint") {
+        document.getElementById("distSlider").disabled = true;
+    } else {
+        document.getElementById("distSlider").disabled = false;
+    }
+}
+
+
 function sliderSlideTrigger(e) {
     let maxMiles = document.getElementById("distSlider").value
     document.getElementById("sliderLabel").innerHTML = maxMiles + " miles"
@@ -278,3 +291,34 @@ function sliderSetTrigger(e) {
 function highlight_trails(trail_id_array) {
     map.setFilter("trails-highlighted", ['in', "id", ...trail_id_array])
 }
+
+map.on('click', 'trails-all', function(e) {
+
+    //var coordinates = e.features[0].geometry.coordinates[0];
+    let coordinates = e.lngLat;
+    console.log(coordinates)
+    var description = e.features[0].properties["name"];
+    console.log(description)
+
+    function toTitleCase(str) {
+        str = str.toLowerCase().split(' ');
+        for (var i = 0; i < str.length; i++) {
+            str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
+        }
+        return str.join(' ');
+    };
+
+    // Ensure that if the map is zoomed out such that multiple
+    // copies of the feature are visible, the popup appears
+    // over the copy being pointed to.
+    // while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+    //     coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+    // }
+
+    popupHtml = "<b>" + toTitleCase(description) + "</b>"
+
+    new mapboxgl.Popup()
+        .setLngLat(coordinates)
+        .setHTML(popupHtml)
+        .addTo(map);
+});

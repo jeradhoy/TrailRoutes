@@ -19,13 +19,19 @@
 
 <body>
     <div class='sidebar pad2'>
-        <div class='heading' style='text-align: center'>
-            <h1>Trail Routes</h1>
-        </div>
-        <div class="slidecontainer">
-            <em>Input Max Mileage:</em>
-            <input type="range" min="1" max="100" value="26" class="slider" id="distSlider" name="miles">
-            <label id="sliderLabel" for="miles"></label>
+        <div class='topSidebar'>
+            <div class='heading'>
+
+                <h1><i class='fa fa-mountain'></i>Trail Routes</h1>
+            </div>
+            <!-- <input type="radio" name="routeType" value="loop"> Loops <br> -->
+            <!-- <input type="radio" name="routeType" id="routeType" value="outAndBack"> Out-and-Back <br>
+            <input type="radio" name="routeType" id="routeType" value="pointToPoint"> Point-to-Point -->
+            <div class="slidecontainer">
+                <em>Choose Your Max Mileage:</em>
+                <input type="range" min="1" max="50" value="26" class="slider" id="distSlider" name="miles">
+                <label id="sliderLabel" for="miles"></label>
+            </div>
         </div>
         <div id='listings' , class='listings'></div>
     </div>
