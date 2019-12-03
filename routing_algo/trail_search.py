@@ -1,5 +1,6 @@
 from typing import *
 import psycopg2
+import copy
 #import database
 
 def get_trails(conn, junct_id, max_dist):
@@ -101,6 +102,101 @@ def find_loops(graph, start_node, min_dist, max_dist):
     #path_list_dict = [{"trails": [path[1] for path in all_paths[butt[0]] if path[1] is not None] + [path[1] for path in all_paths[butt[1]][::-1] if path[1] is not None], "dist": butt[2]} for butt in butts]
     return sorted(path_list_dict, key = lambda entry: entry["dist"], reverse=True)
 
+
+# Finds the point to point distance using a two way
+def find_point_to_point(graph, start_point, end_point, max_paths):
+    # TODO Max distance might be a good implementation idea to stop bfs from going out too far.
+    # We can stop find the max bfs by looking at the distance between the start and end point.
+
+    # Idea: Create a new path and path id for each neighbor. Make sure to prune and delete old paths.
+    # Store a list of path ids with each vertex.
+    # Will need a seperate visited list for each path.
+    paths = set()
+
+    front_queue = []
+    front_queue.append([start_point])
+    front_distances = []
+    front_distances.append(0)
+
+    back_queue = []
+    back_queue.append([end_point])
+    back_distances = []
+    back_distances.append(0)
+
+    # BFS
+    # TODO: think about if I need to make this an or.
+    while len(front_queue) > 0 and len(back_queue) > 0:
+
+        # Front direction
+        front_current_path = front_queue.pop(0)
+        front_current_node = front_current_path[-1]
+        front_current_distance = front_distances.pop(0)
+
+        if (front_current_node == end_point):
+            paths.add(tuple([tuple(front_current_path), front_current_distance]))
+            if len(paths) == max_paths:
+                return (list(paths))
+            continue
+
+        for i in range(0, len(back_queue)):
+            if (back_queue[i][-1] == front_current_node):
+
+                # TODO: Do visited bitvector implementation to speed things up.
+                intersection = [value for value in front_current_path if value in back_queue[i]]
+                if len(intersection) == 1:
+                    back_queue[i].reverse()
+                    new_path = front_current_path[:-1] + back_queue[i]
+                    paths.add(tuple([tuple(new_path), back_distances[i] + front_current_distance]))
+                    if len(paths) == max_paths:
+                        return (list(paths))
+
+                    break
+
+        for neighbor in graph[front_current_node]:
+
+            # TODO make visited array
+            if not neighbor[0] in front_current_path:
+                new_path = copy.deepcopy(front_current_path)
+                new_path.append(neighbor[0])
+                front_queue.append(new_path)
+                front_distances.append(front_current_distance + neighbor[2])
+
+        # Back direction
+        back_current_path = back_queue.pop(0)
+        back_current_node = back_current_path[-1]
+        back_current_distance = back_distances.pop(0)
+
+        if (back_current_node == start_point):
+            back_current_path.reverse()
+            paths.add(tuple([tuple(back_current_path), back_current_distance]))
+            if len(paths) == max_paths:
+                return (list(paths))
+            continue
+
+        for i in range(0, len(front_queue)):
+            if front_queue[i][-1] == back_current_node:
+
+                # TODO: Do visited bitvector implementation here to speed things up.
+                intersection = [value for value in back_current_path if value in front_queue[i]]
+                if len(intersection) == 1:
+                    rev_back_path = copy.deepcopy(back_current_path)
+                    rev_back_path.reverse()
+                    new_path = front_queue[i] + rev_back_path[1:]
+                    paths.add(tuple([tuple(new_path), back_current_distance + front_distances[i]]))
+                    if len(paths) == max_paths:
+                        return (list(paths))
+                    break
+
+        for neighbor in graph[back_current_node]:
+
+            # TODO make visited array
+            if not neighbor[0] in back_current_path:
+                new_path = copy.deepcopy(back_current_path)
+                new_path.append(neighbor[0])
+                back_queue.append(new_path)
+                back_distances.append(back_current_distance + neighbor[2])
+
+    return (list(paths))
 
 if __name__ == "__main__":
     node_dict = create_node_dict(trail_list)
