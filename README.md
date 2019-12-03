@@ -54,9 +54,17 @@ https://prd-tnm.s3.amazonaws.com/StagedProducts/Tran/Shape/TRAN_12_Florida_GU_ST
 1. Dissolve (On trail number and name)
 2. merge lines
 3. split with lines
+3. v.split at 0.5 mile increment
 4. Add unique (autoincrement) index (name field "id")
 4. extract specfic vertices (0, -1)
 5. Calculate length (Field calculator, length_mi) ( $length * 0.000621371)
+
+Save shapefiles
+Load into postgres
+Process with postgresql
+Export from postgres to GEOJSON
+Upload to mapbox
+
 
 # Probably need web server in the middle to serve mapbox tiles:
 Tegola and Martin seem like two good ones:
