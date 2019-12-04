@@ -28,6 +28,20 @@ def get_all_loops(conn, junct_id, max_dist):
 
     return(loops)
 
+def get_point_to_point(conn, junct_id1, junct_id2, max_dist):
+    
+    trail_list = get_trails(conn, junct_id1, max_dist)
+
+    node_dict = create_node_dict(trail_list)
+
+    paths = find_all_paths(node_dict, junct_id1, max_dist, junct_id2)
+
+    
+    #paths = find_point_to_point(node_dict, junct_id1, junct_id2, 100)
+    paths_processed = process_paths(paths)
+
+    return paths_processed
+
 
 # {trail_id: [(node_1, node_2, dist)]}
 def create_node_dict(trail_list: List) -> Dict:
@@ -59,8 +73,14 @@ def find_all_paths(graph, current_node, max_dist, target_node=None, trail_to=Non
     if target_node is None:
         paths.append(path)
 
-    if current_dist > max_dist or current_node not in graph or current_node == target_node:
+    if current_node == target_node or current_node not in graph:
         return [path]
+
+    if current_dist > max_dist:
+        if target_node == None:
+            return [path]
+        else:
+            return []
 
 
     for next_node in graph[current_node]:
@@ -75,14 +95,36 @@ def find_all_paths(graph, current_node, max_dist, target_node=None, trail_to=Non
                 paths.append(newpath)
     return paths
 
+def find_p2p_dfs(conn, junct_id1, junct_id2, max_dist):
+
+    trail_list1 = get_trails(conn, junct_id1, max_dist)
+    node_dict1 = create_node_dict(trail_list1)
+
+    trail_list2 = get_trails(conn, junct_id2, max_dist)
+    node_dict2 = create_node_dict(trail_list2)
+
+    paths1 = find_all_paths(node_dict1, junct_id1, max_dist/2)
+    paths2 = find_all_paths(node_dict2, junct_id2, max_dist/2)
+
+    butts = find_butted_paths(paths1, paths2, min_dist=0, max_dist=max_dist)
+
+    print(butts)
+    #print([tuple([paths1[butt[0]][0] + paths2[butt[1]][0][1:], butt[2]]) for butt in butts])
+
+
+    
+
 
 # So this finds dfs paths away from 
 
-def find_butted_paths(path_list, min_dist, max_dist):
-    path_ends = [(path[-1][0], path[-1][2]) for path in path_list]
+def find_butted_paths(path_list1, path_list2, min_dist, max_dist):
+
+    path_ends1 = [(path[-1][0], path[-1][2]) for path in path_list1]
+    path_ends2 = [(path[-1][0], path[-1][2]) for path in path_list2]
+
     loop_list = []
-    for i, x in enumerate(path_ends):
-        for j, y in enumerate(path_ends):
+    for i, x in enumerate(path_ends1):
+        for j, y in enumerate(path_ends2):
             if x[0] == y[0]:
                 total_dist = x[1] + y[1]
                 if total_dist < max_dist and total_dist > min_dist and (j, i, total_dist) not in loop_list:
@@ -91,10 +133,11 @@ def find_butted_paths(path_list, min_dist, max_dist):
 
 
 
+
 def find_loops(graph, start_node, min_dist, max_dist):
 
     all_paths = find_all_paths(graph, start_node, max_dist/2)
-    butts = find_butted_paths(all_paths, min_dist, max_dist)
+    butts = find_butted_paths(all_paths, all_paths, min_dist, max_dist)
     path_list_tuple = [(tuple([path[1] for path in all_paths[butt[0]] if path[1] is not None] + [path[1] for path in all_paths[butt[1]][::-1] if path[1] is not None]), butt[2]) for butt in butts]
     # Thought I might be fixing a unique issue here, but idk if i did
     path_list_unique = list(set(path_list_tuple))
@@ -197,6 +240,14 @@ def find_point_to_point(graph, start_point, end_point, max_paths):
                 back_distances.append(back_current_distance + neighbor[2])
 
     return (list(paths))
+
+def process_paths(paths):
+
+    path_list = [tuple([tuple([seg[1] for seg in path if seg[1] is not None]), path[-1][-1]]) for path in paths]
+    path_list_unique = list(set(path_list))
+    path_list_dict = [{"trails": path[0] , "dist": path[1]} for path in path_list_unique]
+    #path_list_dict = [{"trails": [path[1] for path in all_paths[butt[0]] if path[1] is not None] + [path[1] for path in all_paths[butt[1]][::-1] if path[1] is not None], "dist": butt[2]} for butt in butts]
+    return sorted(path_list_dict, key = lambda entry: entry["dist"], reverse=False)
 
 if __name__ == "__main__":
     node_dict = create_node_dict(trail_list)
