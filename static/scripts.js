@@ -1,5 +1,14 @@
 mapboxgl.accessToken = 'pk.eyJ1IjoiamVyYWRob3kiLCJhIjoiY2szZXd5dnBuMDA0NzNobnRhNDBvMjJpNSJ9.QxDHGJ-5MQD--0c7XpVOVA'; //'pk.eyJ1IjoiamVyYWRob3kiLCJhIjoib1A4Y3RFayJ9.ve4v3jODJ71s2Bra6Q_xHw';
 
+const CONFIG = {
+    url: 'http://trailroutes.run',
+    trails_source_id: 'jeradhoy.8hnvz73v',
+    trails_layer_name: 'trail_junct_rel_simp_2-109d8x',
+    juncts_source_id: 'jeradhoy.8fiw3pi0',
+    juncts_layer_name: 'junctions_new_2-6l8vad'
+}
+
+
 var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/outdoors-v10',
@@ -8,6 +17,9 @@ var map = new mapboxgl.Map({
     center: [-111.0429, 45.6770],
     zoom: 10
 });
+
+introJs().setOptions({ 'tooltipPosition': 'right' }).start();
+
 //map.addControl(new mapboxgl.FullscreenControl());
 
 // map.addControl(new mapboxgl.GeolocateControl({
@@ -41,8 +53,14 @@ function buildPathList(data) {
     let listings = document.getElementById('listings');
     highlight_trails([""])
 
+    if (data.length == 0) {
+        listings.innerHTML = "<b>No routes found! Try increasing max mileage or making sure your trails are connected!</b>"
+        return
+    }
+
     listings.innerHTML = ""
-        // Iterate through the list of stores
+
+    // Iterate through the list of stores
     for (let i = 0; i < data.length; i++) {
 
         let currentPath = data[i];
@@ -79,19 +97,19 @@ map.on('load', function(e) {
 
     map.addSource("junctions", {
         type: 'vector',
-        url: 'mapbox://jeradhoy.bo7xlhfs',
+        url: 'mapbox://' + CONFIG["juncts_source_id"]
     });
 
     map.addSource("trails", {
         type: 'vector',
-        url: 'mapbox://jeradhoy.8nvbs1fn'
+        url: 'mapbox://' + CONFIG["trails_source_id"]
     });
 
     map.addLayer({
         id: "trails-all",
         type: "line",
         source: "trails",
-        "source-layer": "trail_rel_split5-7gfg4m",
+        "source-layer": CONFIG["trails_layer_name"],
         layout: {
             "line-join": "round",
             "line-cap": "round"
@@ -108,7 +126,7 @@ map.on('load', function(e) {
         id: "trails-highlighted",
         type: "line",
         source: "trails",
-        "source-layer": "trail_rel_split5-7gfg4m",
+        "source-layer": CONFIG["trails_layer_name"],
         layout: {
             "line-join": "round",
             "line-cap": "round"
@@ -126,7 +144,7 @@ map.on('load', function(e) {
         type: "circle",
         source: "junctions",
         minzoom: 9,
-        "source-layer": "juncts_split5-03ug6s",
+        "source-layer": CONFIG["juncts_layer_name"],
         paint: {
             "circle-radius": 10,
             "circle-color": "#B42222",
@@ -140,7 +158,7 @@ map.on('load', function(e) {
         type: "circle",
         source: "junctions",
         minzoom: 9,
-        "source-layer": "juncts_split5-03ug6s",
+        "source-layer": CONFIG["juncts_layer_name"],
         paint: {
             "circle-radius": 10,
             "circle-color": "#B42222",
@@ -180,14 +198,16 @@ let maxMiles = document.getElementById("distSlider").value;
 // Logs the junct_id of the feature you are mousing over
 map.on("click", "junctions-all", function(e) {
 
-    if (juncts_selected.length >= 2 || document.getElementById("routeType1").checked == true) {
+    console.log(e.features[0].properties)
+
+    if (juncts_selected.length >= 2 || document.getElementById("routeTypeOB").checked == true) {
         juncts_selected = []
     }
 
     juncts_selected.push(e.features[0].properties["junct_id"])
     map.setFilter("junction-highlighted", ['in', "junct_id", ...juncts_selected, ...mouseover_junct])
 
-    if (document.getElementById("routeType1").checked == true || juncts_selected.length == 2) {
+    if (document.getElementById("routeTypeOB").checked == true || juncts_selected.length == 2) {
         get_paths_and_build(maxMiles, ...juncts_selected); //TODO: change to ...juncts_selected
     }
 
@@ -199,7 +219,7 @@ function get_paths_and_build(maxMiles, junct_id1, junct_id2) {
 
     var request = new XMLHttpRequest();
 
-    let requestString = 'http://trails.jerad.co/routes/' + junct_id1 + "&"
+    let requestString = CONFIG["url"] + '/routes/' + junct_id1 + "&"
     if (junct_id2) {
         requestString += junct_id2
     } else {
@@ -223,23 +243,29 @@ function get_paths_and_build(maxMiles, junct_id1, junct_id2) {
 
 }
 
-document.getElementById("routeType1").addEventListener('click', routeTypeTrigger)
-document.getElementById("routeType2").addEventListener('click', routeTypeTrigger)
+document.getElementById("routeTypeOB").addEventListener('click', routeTypeTrigger)
+document.getElementById("routeTypeP2P").addEventListener('click', routeTypeTrigger)
 
 function routeTypeTrigger(e) {
 
     let routeTypeValue = e.target.value
 
-    console.log(routeTypeValue)
-
+    juncts_selected = []
+    map.setFilter("junction-highlighted", ['in', "junct_id", ...juncts_selected])
+    map.setFilter("trails-highlighted", ['in', "id", ""])
     if (routeTypeValue == "pointToPoint") {
-        // document.getElementById("distSlider").disabled = true;
+        document.getElementById("listings").innerHTML = "<b>Select a starting point on any trail!</b>"
     } else {
-        juncts_selected.splice(0, 1)
-        map.setFilter("junction-highlighted", ['in', "junct_id", ...juncts_selected])
-        document.getElementById("distSlider").disabled = false;
-        get_paths_and_build(maxMiles, ...juncts_selected);
+        document.getElementById("listings").innerHTML = "<b>Select a starting and ending point!</b>"
     }
+
+    // if (routeTypeValue == "pointToPoint") {
+    //     // document.getElementById("distSlider").disabled = true;
+    // } else {
+    //     map.setFilter("junction-highlighted", ['in', "junct_id", ...juncts_selected])
+    //     // document.getElementById("distSlider").disabled = false;
+    //     get_paths_and_build(maxMiles, ...juncts_selected);
+    // }
 }
 
 
@@ -254,9 +280,9 @@ function sliderSlideTrigger(e) {
 function sliderSetTrigger(e) {
 
     maxMiles = e.target.value
-    if (juncts_selected.length !== 0 && document.getElementById("routeType1").checked == true) {
+    if (juncts_selected.length !== 0 && document.getElementById("routeTypeOB").checked == true) {
         get_paths_and_build(maxMiles, juncts_selected[0]);
-    } else if (juncts_selected.length == 2 && document.getElementById("routeType2").checked == true) {
+    } else if (juncts_selected.length == 2 && document.getElementById("routeTypeP2P").checked == true) {
         get_paths_and_build(maxMiles, ...juncts_selected);
     }
 
@@ -266,23 +292,23 @@ function highlight_trails(trail_id_array) {
     map.setFilter("trails-highlighted", ['in', "id", ...trail_id_array])
 }
 
-map.on('click', 'trails-all', function(e) {
+// map.on('click', 'trails-all', function(e) {
 
-    let coordinates = e.lngLat;
-    var description = e.features[0].properties["name"];
+//     let coordinates = e.lngLat;
+//     var description = e.features[0].properties["name"];
 
-    function toTitleCase(str) {
-        str = str.toLowerCase().split(' ');
-        for (var i = 0; i < str.length; i++) {
-            str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
-        }
-        return str.join(' ');
-    };
+//     function toTitleCase(str) {
+//         str = str.toLowerCase().split(' ');
+//         for (var i = 0; i < str.length; i++) {
+//             str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
+//         }
+//         return str.join(' ');
+//     };
 
-    popupHtml = "<b>" + toTitleCase(description) + "</b>"
+//     popupHtml = "<b>" + toTitleCase(description) + "</b>"
 
-    new mapboxgl.Popup()
-        .setLngLat(coordinates)
-        .setHTML(popupHtml)
-        .addTo(map);
-});
+//     new mapboxgl.Popup()
+//         .setLngLat(coordinates)
+//         .setHTML(popupHtml)
+//         .addTo(map);
+// });
