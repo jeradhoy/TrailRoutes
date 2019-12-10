@@ -46,13 +46,13 @@ class Routes(Resource):
         #        ]
         print("Found paths, returning!")
         #print(paths)
-        return paths
+        return paths[0:100]
 
 api.add_resource(Routes, '/routes/<junct_id1>&<junct_id2>&<max_miles>')
 
 # run the application
 if __name__ == "__main__":
-
+    
     # Change user who can access database
     app.run(host="0.0.0.0", port=80, debug=True)
     conn.close()
