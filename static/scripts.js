@@ -1,5 +1,3 @@
-mapboxgl.accessToken = 'pk.eyJ1IjoiamVyYWRob3kiLCJhIjoiY2szZXd5dnBuMDA0NzNobnRhNDBvMjJpNSJ9.QxDHGJ-5MQD--0c7XpVOVA'; //'pk.eyJ1IjoiamVyYWRob3kiLCJhIjoib1A4Y3RFayJ9.ve4v3jODJ71s2Bra6Q_xHw';
-
 const CONFIG = {
     url: 'http://trailroutes.run',
     trails_source_id: 'jeradhoy.8hnvz73v',

@@ -3,6 +3,7 @@ from flask import render_template
 from flask_restful import reqparse, abort, Api, Resource
 import psycopg2
 import json
+import os
 
 from routing_algo.trail_search import get_all_loops
 from routing_algo.trail_search import get_point_to_point
@@ -14,7 +15,7 @@ api = Api(app)
 # a route where we will display a welcome message via an HTML template
 @app.route("/")
 def hello():
-    return render_template('index.html')
+    return render_template('index.html', MAPBOX_API_KEY=os.environ.get("MAPBOX_API_KEY"))
 
 class Routes(Resource):
     
@@ -24,6 +25,7 @@ class Routes(Resource):
     def get(self, junct_id1, junct_id2, max_miles):
 
         print("Finding paths...")
+        
         if junct_id2 == "null":
             paths = get_all_loops(self.conn, int(junct_id1), int(max_miles))
         else:
