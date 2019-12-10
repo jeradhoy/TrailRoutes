@@ -4,6 +4,8 @@
 <head>
     <meta charset=utf-8 />
     <title>Trail Routes</title>
+
+    <meta http-equiv="Cache-Control" content="NO-CACHE">
     <meta name='robots' content='noindex, nofollow'>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.js'></script>
@@ -24,7 +26,6 @@
 
 <body>
 
-
     <div class='sidebar pad2'>
         <div class='topSidebar'>
             <div class='heading' data-intro="Hola! This application helps you find trail routes to run, bike, or backpack on!">
@@ -39,7 +40,7 @@
                 <input type="radio" name="routeType" id="routeTypeP2P" value="pointToPoint"> Point-to-Point
             </div>
             <div class="slidecontainer" data-intro="Choose the max mileage you want to go here.">
-                <b><em>Choose Your Max Mileage:</em></b>
+                <b><em>Choose Your Max Mileage:</em></b><br>
                 <input type="range" min="1" max="50" value="26" class="slider" id="distSlider" name="miles">
                 <label id="sliderLabel" for="miles"></label>
             </div>
@@ -50,7 +51,7 @@
 
     <!-- <button class="button" id='basemapControl' value='mapbox://sprites/mapbox/satellite-streets-v10'><i class='fa fa-globe-americas'></i></button> -->
 
-    <div id='map' class='map pad2' data-intro="Choose your starting points and view your routes here! Cheers!"></div>
+    <div id='map' class='map pad2' data-intro="Choose your starting points and view your routes here by hovering over the results in the sidebar!<br><br>To see the code or contribute click <a href='https://github.com/jeradhoy/TrailRoutes.run'>here</a>."></div>
 
     <script src=" /static/scripts.js " charset="utf-8 "></script>
 
