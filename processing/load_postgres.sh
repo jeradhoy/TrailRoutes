@@ -12,8 +12,8 @@ sudo -u postgres psql -d trailDb -c "DROP TABLE IF EXISTS endpoints;"
 
 sudo su postgres
 # Path needs to be basically to the name of the shapefile, not the folder it is in
-shp2pgsql -d /home/dad/Classes/Databases/Trail_Routes/trails_merged_simp_4326_2 trails | psql -U postgres -d trailDb
-shp2pgsql -d /home/dad/Classes/Databases/Trail_Routes/juncts_merged_4326_2 endpoints | psql -U postgres -d trailDb
+shp2pgsql -d /root/Data/trails_merged_simp_4326_2 trails | psql -U postgres -d trailDb
+shp2pgsql -d /root/Data/juncts_merged_4326_2 endpoints | psql -U postgres -d trailDb
 
 psql trailDb
 
