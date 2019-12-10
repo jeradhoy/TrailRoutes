@@ -1,24 +1,22 @@
 sudo apt update
 sudo apt upgrade
 
+# Install database packages
 sudo apt install postgresql postgresql-contrib
+sudo apt install postgis 
 
-sudo apt install postgis #postgresql-11-postgis-2.5 -- only need for my installation
-
+# Install python3 packages for flask
 sudo apt install python3-pip python3-dev build-essential libssl-dev libffi-dev python3-setuptools
 
-pip3 install Flask
-
-pip3 install flask_restful
+# Install flask stuff..
+pip3 install Flask flask_restful psycopg2
 
 sudo apt install libpq-dev
-pip3 install psycopg2
 
+# Open port 80 to allow regular HTTP connections
 sudo ufw allow 80
 
-npm install mapbox-gl-controls
-
-# Redis
+# download nd setup redist
 wget http://download.redis.io/redis-stable.tar.gz
 tar xvzf redis-stable.tar.gz
 cd redis-stable
