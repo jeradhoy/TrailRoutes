@@ -227,3 +227,11 @@ a {
         left: 100px;
     }
 } */
+
+.introjs-tooltip {
+    font-size: .8m;
+    line-height: 1.6;
+    font-weight: 300;
+    font-family: raleway, helveticaneue, helvetica neue, Helvetica, Arial, sans-serif;
+    color: #222;
+}
