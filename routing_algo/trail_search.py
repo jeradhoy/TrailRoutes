@@ -11,27 +11,36 @@ from collections import defaultdict
 # Checks redis to see if path and milage already exist. 
 # Returns None if trail has not been stored.
 # Otherwise, returns the trails.
-def get_redis(junct_id1,max_dist,junct_id2=""):
+def check_redis(junct_id1,max_dist,junct_id2=""):
 
     r = redis.Redis(host='localhost', port=6379, db=0)
 
-    redis_result = r.hget("trails",str(junct_id1)+
-    ":"+str(junct_id2)+
-    ":"+str(max_dist))
-    
-    if redis_result is None:
-        return redis_result
-    else: 
-        return json.loads(redis_result)
+    preivous_max_dist = r.get(str(junct_id1) + ":" + str(junct_id2) + "_maxDist")
+
+    if preivous_max_dist is None:
+        return None
+
+    preivous_max_dist = int(preivous_max_dist)
+
+    if max_dist > preivous_max_dist:
+        return None
+
+    redis_result = json.loads(r.hget("trails", str(junct_id1) + ":" + str(junct_id2)))
+
+    if max_dist < preivous_max_dist:
+        redis_result = [trail for trail in redis_result if trail["dist"] <= max_dist]
+
+    return redis_result
 
 # Stores the trails in redis under the keys.
 def set_redis(junct_id1,max_dist,trails,junct_id2=""):
     
     r = redis.Redis(host='localhost', port=6379, db=0)
 
+    r.set(str(junct_id1) + ":" + str(junct_id2) + "_maxDist", max_dist)
+
     r.hset("trails",str(junct_id1)+
-    ":"+str(junct_id2)+
-    ":"+str(max_dist),json.dumps(trails))
+    ":"+str(junct_id2) ,json.dumps(trails))
     
 
 def get_trails(conn, junct_id, max_dist):
@@ -52,8 +61,10 @@ def get_trails(conn, junct_id, max_dist):
 def get_all_loops(conn, junct_id, max_dist):
     
     # Check Redis first.
-    redis_result = get_redis(junct_id,max_dist)
-    if  not redis_result is None:
+    redis_result = check_redis(junct_id, max_dist)
+
+    if redis_result is not None:
+        print("Found redis cache, returning...")
         return redis_result
 
     trail_list = get_trails(conn, junct_id, max_dist)
@@ -61,6 +72,8 @@ def get_all_loops(conn, junct_id, max_dist):
     node_dict = create_node_dict(trail_list)
 
     loops = find_loops(node_dict, junct_id, 0, max_dist)
+
+    #print(find_all_paths_dict(node_dict, junct_id, max_dist))
 
     # Store redis results
     set_redis(junct_id,max_dist,loops)
@@ -70,21 +83,25 @@ def get_all_loops(conn, junct_id, max_dist):
 def get_point_to_point(conn, junct_id1, junct_id2, max_dist):
     
     # Check Redis first.
-    redis_result = get_redis(junct_id1,max_dist,junct_id2)
+    redis_result = check_redis(junct_id1, max_dist, junct_id2)
     if  not redis_result is None:
+        print("Found redis cache, returning...")
         return redis_result
 
-    trail_list = get_trails(conn, junct_id1, max_dist)
+    print("Couldn't find redis cache, running DFS..")
 
-    node_dict = create_node_dict(trail_list)
+    paths_processed = find_p2p_dfs(conn, junct_id1, junct_id2, max_dist)
 
-    paths = find_all_paths(node_dict, junct_id1, max_dist, junct_id2)
+    # trail_list = get_trails(conn, junct_id1, max_dist)
+
+    # node_dict = create_node_dict(trail_list)
+
+    # paths = find_all_paths(node_dict, junct_id1, max_dist, junct_id2)
     
-    #paths = find_point_to_point(node_dict, junct_id1, junct_id2, 100)
-    paths_processed = process_paths(paths)
+    # paths_processed = process_paths(paths)
 
     # Store redis results
-    set_redis(junct_id1,max_dist,paths_processed,junct_id2)
+    set_redis(junct_id1, max_dist, paths_processed, junct_id2)
 
     return paths_processed
 
@@ -140,26 +157,16 @@ def find_all_paths(graph, current_node, max_dist, target_node=None, trail_to=Non
                 paths.append(newpath)
     return paths
 
-def find_all_paths2(graph, current_node, max_dist, target_node=None, trail_to=None, current_dist=0, path={}):
-
+# Rewriting to use dictionary so that butt end matching is much faster
+def find_all_paths_dict(graph, current_node, max_dist, trail_to=None, current_dist=0, path=[]):
 
     if trail_to is not None:
         path = path + [(current_node, trail_to, current_dist)]
 
-    paths = []
+    paths = {}
 
-    # Only append each path if looking for loops...
-    if target_node is None:
-        paths.append(path)
-
-    if current_node == target_node or current_node not in graph:
-        return [path]
-
-    if current_dist > max_dist:
-        if target_node == None:
-            return [path]
-        else:
-            return []
+    if current_dist > max_dist or current_node not in graph:
+        return {current_node: [path]}
 
 
     for next_node in graph[current_node]:
@@ -168,10 +175,10 @@ def find_all_paths2(graph, current_node, max_dist, target_node=None, trail_to=No
 
             new_dist = current_dist + next_node[2]
 
-            newpaths = find_all_paths(graph, next_node[0], max_dist, target_node, next_node[1], new_dist, path)
+            newpaths = find_all_paths_dict(graph, next_node[0], max_dist, next_node[1], new_dist, path)
 
-            for newpath in newpaths:
-                paths.append(newpath)
+            for butt, path_list in newpaths.items():
+                paths.setdefault(butt, []).append(path_list)
     return paths
 
 def find_p2p_dfs(conn, junct_id1, junct_id2, max_dist):
@@ -187,13 +194,20 @@ def find_p2p_dfs(conn, junct_id1, junct_id2, max_dist):
 
     butts = find_butted_paths(paths1, paths2, min_dist=0, max_dist=max_dist)
 
-    print(butts)
+    #print(butts)
     #print([tuple([paths1[butt[0]][0] + paths2[butt[1]][0][1:], butt[2]]) for butt in butts])
+
+    path_list_tuple = [(tuple([path[1] for path in paths1[butt[0]] if path[1] is not None] + [path[1] for path in paths2[butt[1]][::-1] if path[1] is not None]), butt[2]) for butt in butts]
+    # Thought I might be fixing a unique issue here, but idk if i did
+
+    path_list_unique = list(set(path_list_tuple))
+    path_list_dict = [{"trails": path[0] , "dist": path[1]} for path in path_list_unique]
+
+    return sorted(path_list_dict, key = lambda entry: entry["dist"], reverse=False)
 
 
 
 # So this finds dfs paths away from 
-
 def find_butted_paths(path_list1, path_list2, min_dist, max_dist):
 
     path_ends1 = [(path[-1][0], path[-1][2]) for path in path_list1]
@@ -214,11 +228,11 @@ def find_butted_paths(path_list1, path_list2, min_dist, max_dist):
 def find_loops(graph, start_node, min_dist, max_dist):
 
     start = time.time()
-
     all_paths = find_all_paths(graph, start_node, max_dist/2)
-    print(time.time() - start)
+    print("Time to find paths: " + str(time.time() - start))
+    start = time.time()
     butts = find_butted_paths(all_paths, all_paths, min_dist, max_dist)
-    print(time.time() - start)
+    print("Time to find butts :)" + str(time.time() - start))
     path_list_tuple = [(tuple([path[1] for path in all_paths[butt[0]] if path[1] is not None] + [path[1] for path in all_paths[butt[1]][::-1] if path[1] is not None]), butt[2]) for butt in butts]
     # Thought I might be fixing a unique issue here, but idk if i did
     path_list_unique = list(set(path_list_tuple))
@@ -332,6 +346,11 @@ def process_paths(paths):
 
 if __name__ == "__main__":
     # set_redis(5924,34,[{"test":(1,2,3,4,6)}],99)
-    # print(get_redis(5924,34,99))
-    node_dict = create_node_dict(trail_list)
-    print(find_loops(node_dict, 5924, 5, 10))
+    # print(check_redis(5924,34,99))
+    #node_dict = create_node_dict(trail_list)
+    #print(find_loops(node_dict, 5924, 5, 10))
+    conn = psycopg2.connect(dbname="trailDb", user="postgres", host="localhost", password="meow")
+    node_dict = create_node_dict(get_trails(conn,5924,25))
+    print(get_point_to_point(conn, 5891, 5924, 19))
+    
+    conn.close()
