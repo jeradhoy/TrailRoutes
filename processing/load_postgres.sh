@@ -12,12 +12,13 @@ sudo -u postgres psql -d trailDb -c "DROP TABLE IF EXISTS endpoints;"
 
 sudo su postgres
 # Path needs to be basically to the name of the shapefile, not the folder it is in
-shp2pgsql -d /root/Data/trails_split5 trails | psql -U postgres -d trailDb
-shp2pgsql -d /root/Data/endpoints_split5 endpoints | psql -U postgres -d trailDb
+shp2pgsql -d /root/Data/trails_merged_simp_4326_2 trails | psql -U postgres -d trailDb
+shp2pgsql -d /root/Data/juncts_merged_4326_2 endpoints | psql -U postgres -d trailDb
 
 # Set db password with --
 psql trailDb
-ALTER USER postgres PASSWORD 'meow';
+
+#ALTER USER postgres PASSWORD 'meow';
 
 pgsql2shp -f junctions_pgis -h localhost -u postgres -P <db_psswd> trailDb "SELECT junct_id, geom FROM junctions"
 pgsql2shp -f trails_pgis -h localhost -u postgres -P <db_psswd> trailDb "SELECT * FROM trail_junct_rel"
