@@ -3,12 +3,17 @@
 
 <head>
     <meta charset=utf-8 />
-    <title>Trail Router</title>
+    <title>Trail Routes</title>
     <meta name='robots' content='noindex, nofollow'>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapboxjcom/mapbox-gl-js/v1.5.0/mapbox-gl.css' rel='stylesheet' />
+
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.1/css/all.css">
+
+
+    <script src="https://cdn.jsdelivr.net/npm/intro.js@2.9.3/minified/intro.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js@2.9.3/minified/introjs.min.css">
 
     <link rel="stylesheet" href="/static/theme.css">
 
@@ -18,32 +23,36 @@
 </head>
 
 <body>
+
+
     <div class='sidebar pad2'>
         <div class='topSidebar'>
-            <div class='heading'>
+            <div class='heading' data-intro="Hola! This application helps you find trail routes to run, bike, or backpack on!">
 
                 <h1><i class='fa fa-mountain'></i>Trail Routes</h1>
             </div>
-            <b><em>Choose Your Route Type:</em></b> <br>
-            <!-- <input type="radio" name="routeType" value="loop"> Loops <br> -->
-            <input type="radio" name="routeType" id="routeType1" value="outAndBack" checked> Out-and-Back <br>
-            <input type="radio" name="routeType" id="routeType2" value="pointToPoint"> Point-to-Point
-            <div class="slidecontainer">
+            <div data-intro="Choose what type of trail route you want here. Out-and-back routes include loops and lollipop loops, but all begin and end at the same point. Point-to-point routes start and end at different points.">
+
+                <b><em>Choose Your Route Type:</em></b> <br>
+                <!-- <input type="radio" name="routeType" id="routeTypeLoop" value="loop"> Loops <br> -->
+                <input type="radio" name="routeType" id="routeTypeOB" value="outAndBack" checked> Out-and-Back <br>
+                <input type="radio" name="routeType" id="routeTypeP2P" value="pointToPoint"> Point-to-Point
+            </div>
+            <div class="slidecontainer" data-intro="Choose the max mileage you want to go here.">
                 <b><em>Choose Your Max Mileage:</em></b>
                 <input type="range" min="1" max="50" value="26" class="slider" id="distSlider" name="miles">
                 <label id="sliderLabel" for="miles"></label>
             </div>
         </div>
-        <div id='listings' , class='listings'></div>
+        <div id='listings' class='listings'>
+        </div>
     </div>
 
-    <div id='map' class='map pad2'></div>
     <!-- <button class="button" id='basemapControl' value='mapbox://sprites/mapbox/satellite-streets-v10'><i class='fa fa-globe-americas'></i></button> -->
 
+    <div id='map' class='map pad2' data-intro="Choose your starting points and view your routes here! Cheers!"></div>
 
 
     <script src=" /static/scripts.js " charset="utf-8 "></script>
 
 </body>
-
-uukjk
