@@ -1,3 +1,5 @@
+apiKey = 'pk.eyJ1IjoiamVyYWRob3kiLCJhIjoib1A4Y3RFayJ9.ve4v3jODJ71s2Bra6Q_xHw'
+
 const CONFIG = {
     url: 'http://trailroutes.run',
     trails_source_id: 'jeradhoy.8hnvz73v',
@@ -8,6 +10,7 @@ const CONFIG = {
 
 
 var map = new mapboxgl.Map({
+    accessToken: apiKey,
     container: 'map',
     style: 'mapbox://styles/mapbox/outdoors-v10',
     // style: 'mapbox://styles/mapbox/satellite-streets-v10',
