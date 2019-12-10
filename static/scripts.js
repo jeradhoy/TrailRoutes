@@ -19,8 +19,6 @@ var map = new mapboxgl.Map({
     zoom: 10
 });
 
-introJs().setOptions({ 'tooltipPosition': 'right' }).start();
-
 //map.addControl(new mapboxgl.FullscreenControl());
 
 // map.addControl(new mapboxgl.GeolocateControl({
@@ -30,11 +28,14 @@ introJs().setOptions({ 'tooltipPosition': 'right' }).start();
 //   trackUserLocation: true
 // }));
 
+introJs().setOptions({ 'tooltipPosition': 'right' }).start();
+
+let juncts_selected = [];
+let mouseover_junct = [];
+let maxMiles = document.getElementById("distSlider").value;
 
 document.getElementById("sliderLabel").innerHTML = document.getElementById("distSlider").value + " miles"
 document.getElementById("listings").innerHTML = "<b>Begin by selecting a starting point on any trail!</b>"
-
-
 
 function buildPathList(data) {
 
@@ -188,18 +189,10 @@ map.on("mouseleave", "junctions-all", function() {
     map.setFilter("junction-highlighted", ['in', "junct_id", ...juncts_selected])
 });
 
-map.on("click", "trails-all", function(e) {
-    console.log(e.features[0].properties)
-});
-
-let juncts_selected = [];
-let mouseover_junct = [];
-let maxMiles = document.getElementById("distSlider").value;
 
 // Logs the junct_id of the feature you are mousing over
 map.on("click", "junctions-all", function(e) {
 
-    console.log(e.features[0].properties)
 
     if (juncts_selected.length >= 2 || document.getElementById("routeTypeOB").checked == true) {
         juncts_selected = []
@@ -209,7 +202,10 @@ map.on("click", "junctions-all", function(e) {
     map.setFilter("junction-highlighted", ['in', "junct_id", ...juncts_selected, ...mouseover_junct])
 
     if (document.getElementById("routeTypeOB").checked == true || juncts_selected.length == 2) {
-        get_paths_and_build(maxMiles, ...juncts_selected); //TODO: change to ...juncts_selected
+        get_paths_and_build(maxMiles, ...juncts_selected);
+    } else if (juncts_selected.length == 1 && document.getElementById("routeTypeP2P").checked == true) {
+        map.setFilter("trails-highlighted", ['in', "id", ""])
+        document.getElementById("listings").innerHTML = "<b>Select an ending point to calculate routes!</b>"
     }
 
 });
@@ -228,7 +224,6 @@ function get_paths_and_build(maxMiles, junct_id1, junct_id2) {
     }
 
     requestString += "&" + maxMiles
-    console.log(requestString)
 
     // Open a new connection, using the GET request on the URL endpoint
     request.open('GET', requestString, true)
@@ -257,16 +252,9 @@ function routeTypeTrigger(e) {
     if (routeTypeValue == "pointToPoint") {
         document.getElementById("listings").innerHTML = "<b>Select a starting point on any trail!</b>"
     } else {
-        document.getElementById("listings").innerHTML = "<b>Select a starting and ending point!</b>"
+        document.getElementById("listings").innerHTML = "<b>Select starting and ending points!</b>"
     }
 
-    // if (routeTypeValue == "pointToPoint") {
-    //     // document.getElementById("distSlider").disabled = true;
-    // } else {
-    //     map.setFilter("junction-highlighted", ['in', "junct_id", ...juncts_selected])
-    //     // document.getElementById("distSlider").disabled = false;
-    //     get_paths_and_build(maxMiles, ...juncts_selected);
-    // }
 }
 
 
