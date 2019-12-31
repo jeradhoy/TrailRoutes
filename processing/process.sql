@@ -52,3 +52,9 @@ CLUSTER junctions USING junctions_geom_gist;
 
 -- Dump trail junctions to csv
 -- COPY (SELECT junct_id FROM junctions) TO '/tmp/junctions.csv' WITH CSV header;
+
+-- UPDATE trail_junct_rel
+-- SET length_mi = ST_LENGTH(geom)/1300;
+
+UPDATE trail_junct_rel
+SET length_mi = ST_LENGTH(ST_Transform(geom, 4326)::geography)/1609.34;
