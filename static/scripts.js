@@ -13,6 +13,7 @@ var map = new mapboxgl.Map({
     accessToken: apiKey,
     container: 'map',
     style: 'mapbox://styles/mapbox/outdoors-v10',
+    // style: 'mapbox://styles/mapbox/cjaudgl840gn32rnrepcb9b9g', // the outdoors-v10 style but without Hillshade layers
     // style: 'mapbox://styles/mapbox/satellite-streets-v10',
 
     center: [-111.0429, 45.6770],
@@ -96,6 +97,20 @@ function buildPathList(data) {
 
 
 map.on('load', function(e) {
+
+    // map.addSource('dem', {
+    //     'type': 'raster-dem',
+    //     'url': 'mapbox://mapbox.terrain-rgb'
+    // });
+    // map.addLayer({
+    //         'id': 'hillshading',
+    //         'source': 'dem',
+    //         'type': 'hillshade'
+    //             // insert below waterway-river-canal-shadow;
+    //             // where hillshading sits in the Mapbox Outdoors style
+    //     },
+    //     'waterway-river-canal-shadow'
+    // );
 
     map.addSource("junctions", {
         type: 'vector',
