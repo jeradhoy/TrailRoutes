@@ -1,6 +1,6 @@
 # [TrailRoutes](http://trailroutes.jerad.co): A running and backpacking trail route finding application
 
-The following writeup was submitted for the graduate level MSU CS class, CSCI 550: Advanced Databases, for our semester project.
+The following writeup was submitted for the graduate level MSU CS class, CSCI 550: Advanced Databases, for our semester project. Here's a [link](https://docs.google.com/presentation/d/1Nafbu3PLJ1HX8OhaLzmBLX5mWZhNjKrHxeWugF80GmE/edit?usp=sharing) to the slides we presented about it.
 
 ## Problem Statement
 
