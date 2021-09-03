@@ -1,4 +1,4 @@
-# [http://trailroutes.jerad.co/](trailroutes.jerad.co): A running and backpacking trail route finding application
+# [trailroutes.jerad.co](trailroutes.jerad.co): A running and backpacking trail route finding application
 
 The following writeup was submitted for the graduate level MSU CS class, CSCI 550: Advanced Databases, for our semester project.
 
