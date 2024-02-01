@@ -2,7 +2,7 @@
 
 The following writeup was submitted for the graduate level MSU CS class, CSCI 550: Advanced Databases, for our semester project. Here's a [link](https://docs.google.com/presentation/d/1Nafbu3PLJ1HX8OhaLzmBLX5mWZhNjKrHxeWugF80GmE/edit?usp=sharing) to the slides we presented about it.
 
-[![Foo](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/ff18def6-9468-4a22-ad88-ee6b3fb2e5a7/unnamed.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230216%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230216T050058Z&X-Amz-Expires=86400&X-Amz-Signature=9da2e60acccd0f533a4d4ed9a4e08bf40348a752b709adaac55f20caa0918213&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22unnamed.png%22&x-id=GetObject)](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/ff18def6-9468-4a22-ad88-ee6b3fb2e5a7/unnamed.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230216%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230216T050058Z&X-Amz-Expires=86400&X-Amz-Signature=9da2e60acccd0f533a4d4ed9a4e08bf40348a752b709adaac55f20caa0918213&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22unnamed.png%22&x-id=GetObject)
+![Foo](trailroutes.png)
 
 ## Problem Statement
 
